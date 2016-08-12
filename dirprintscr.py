@@ -17,22 +17,32 @@ def query_webpage_statuscode(host,url,timeout):
 		print (e)
 		print ("failed on " + host + url)
 		
-def screenshot(host,url,file_name, driver,timeout):
+def screenshot(host,url,file_name, driver):
+	if verbose:
+		print ("attempting to screenshot: " + str(url))
 	try:
 		driver.get(host+url)
+		print(file_name)
 		driver.save_screenshot(file_name)
 		return True
 	except TimeoutException:
+		if verbose:
+			print ("Failed to screenshot: "+ str(e))
 		return False
 
 
 def dirp(host ,URLS, outpath, timeout=10,extension="", verbose=True ,user_agent="Mozilla/5.0 (Windows NT\6.1) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/41.0.2228.\0 Safari/537.36"):
 	outpath = os.path.join(outpath, "output")
+	imagesOutputPath = os.path.join(outpath, "images")
+	if not os.path.exists(outpath):
+		os.makedirs(outpath)
+	if not os.path.exists(imagesOutputPath):
+		os.makedirs(imagesOutputPath)
 	
 	print ("Starting on " + host)
 	
 	queue = []
-	queue.append(host)
+	queue.append("/")
 	
 	dcap = dict(DesiredCapabilities.PHANTOMJS)
 	dcap["phantomjs.page.settings.userAgent"] = user_agent
@@ -50,20 +60,27 @@ def dirp(host ,URLS, outpath, timeout=10,extension="", verbose=True ,user_agent=
 		os.makedirs(outpath)
 		
 	while (queue):
-		host = queue.popleft() #Take the next root URL
+		base = queue.pop(0)
+		host = host + base #Take the next root URL
 		for url in URLS:
+			if (extension is not None):
+				url = url + str(extension)
 			if verbose:
 				print ("Querying " + host + url)
-			statuscode = query_webpage_statuscode(ip,url,timeout)
+			statuscode = query_webpage_statuscode(host,url,timeout)
 			if verbose:
 				print ("Status Code: "+ str(statuscode))
 
 			if (statuscode in found_codes):
-				print ("found" + url)
-				filename = os.path.join("output", "images", str(host+url) + ".png")
-				screenshot(host,url,filename,driver,timeout=5)
+				print ("found " + url)
+				filename = os.path.join("output", "images", str(url + str(uuid4()))  + ".png")
+				if verbose:
+					if (screenshot(host,url,filename,driver)):
+						print ("Successful screenshot: " + str(host) + str(url))
+					else:
+						print ("Unsuccessful screenshot: "+ str(host) + str(url))
 			elif (statuscode in not_found_codes):
-				queue.append(host + url) #append a found directory
+				queue.append(url) #append a found directory
 
 	
 	
@@ -86,9 +103,9 @@ if __name__ == "__main__":
 					  dest="timeout", type=int, default=10, 
 					  help='Number of seconds to try to resolve')
 	parser.add_option("-v", action='store_true', dest="verbose",
-					  help='Display console output for fetching each host')
-	parser.add_option("-x", action='store_true', dest="extension",
-					  help='extension to append.')
+					  help='Adds some verbosity when running.')
+	parser.add_option("-x", action='store', dest="extension",
+					  help='extension to append. i.e. .jsp, .html, .aspx')
 					  
 
 
