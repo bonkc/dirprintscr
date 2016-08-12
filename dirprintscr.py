@@ -33,11 +33,9 @@ def screenshot(host,url,file_name, driver):
 
 def dirp(host ,URLS, outpath, timeout=10,extension="", verbose=True ,user_agent="Mozilla/5.0 (Windows NT\6.1) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/41.0.2228.\0 Safari/537.36"):
 	outpath = os.path.join(outpath, "output")
-	imagesOutputPath = os.path.join(outpath, "images")
 	if not os.path.exists(outpath):
 		os.makedirs(outpath)
-	if not os.path.exists(imagesOutputPath):
-		os.makedirs(imagesOutputPath)
+
 	
 	print ("Starting on " + host)
 	
@@ -74,7 +72,7 @@ def dirp(host ,URLS, outpath, timeout=10,extension="", verbose=True ,user_agent=
 
 			if (statuscode in found_codes):
 				print ("found " + url)
-				filename = os.path.join("output", "images", str(url + str(uuid4()))  + ".png")
+				filename = os.path.join("output", str(url + str(uuid4()))  + ".png")
 				if verbose:
 					if (screenshot(host,url,filename,driver)):
 						print ("Successful screenshot: " + str(host) + str(url))
