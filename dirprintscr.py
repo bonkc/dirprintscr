@@ -42,7 +42,7 @@ def dirp(host ,URLS, outpath, timeout=10,extension="", verbose=True ,user_agent=
 	print ("Starting on " + host)
 	
 	queue = []
-	queue.append("/")
+	queue.append(host)
 	
 	dcap = dict(DesiredCapabilities.PHANTOMJS)
 	dcap["phantomjs.page.settings.userAgent"] = user_agent
@@ -61,7 +61,8 @@ def dirp(host ,URLS, outpath, timeout=10,extension="", verbose=True ,user_agent=
 		
 	while (queue):
 		base = queue.pop(0)
-		host = host + base #Take the next root URL
+		#host = host + base #Take the next root URL
+
 		for url in URLS:
 			if (extension is not None):
 				url = url + str(extension)
@@ -80,7 +81,9 @@ def dirp(host ,URLS, outpath, timeout=10,extension="", verbose=True ,user_agent=
 					else:
 						print ("Unsuccessful screenshot: "+ str(host) + str(url))
 			elif (statuscode in not_found_codes):
-				queue.append(url) #append a found directory
+				if verbose:
+					print ("Found directory: " + str(url))
+				queue.append(host+url+"/") #append a found directory
 
 	
 	
